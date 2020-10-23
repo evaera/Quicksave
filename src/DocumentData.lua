@@ -19,9 +19,9 @@ end
 
 function DocumentData:_load()
 	if self._lockSession then
-		self._currentData = DataLayer.unpack(self._lockSession:read())
+		return DataLayer.unpack(self._lockSession:read())
 	else
-		self._currentData = self._readOnlyData
+		return self._readOnlyData
 	end
 end
 
