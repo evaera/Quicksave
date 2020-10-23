@@ -44,10 +44,11 @@ return function()
 	end)
 
 	describe("Document", function()
-		local document
+		local document, guid
 
 		beforeEach(function()
-			document = Quicksave.getCollection("playerData"):getDocument(HttpService:GenerateGUID()):expect()
+			guid = HttpService:GenerateGUID()
+			document = Quicksave.getCollection("playerData"):getDocument(guid):expect()
 		end)
 
 		it("should give new keys as nil", function()
@@ -64,6 +65,20 @@ return function()
 			document:set("foo", "bar")
 
 			document:save():expect()
+		end)
+
+		it("should be able to save, unlock, relock and load the same data", function()
+			document:set("foo", "bar")
+
+			document:save():expect()
+
+			document:close()
+
+			local document2 = Quicksave.getCollection("playerData"):getDocument(guid):expect()
+
+			expect(document).to.never.equal(document2)
+
+			expect(document2:get("foo")).to.equal("bar")
 		end)
 
 		it("should convert number keys to strings", function()

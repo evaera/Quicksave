@@ -81,14 +81,19 @@ end
 function LockSession:write(data)
 	self:_ensureLocked()
 
+	if data == nil then
+		warn("[Debug, remove for release] LockSession:write data is nil!")
+	end
+
 	if os.clock() - self._lastWrite < 6 then
 		self._pendingData = data
 
 		if not self._pendingPromise then
 			self._pendingPromise = Promise.delay(os.clock() - self._lastWrite):andThen(function()
+				local pendingData = self._pendingData
 				self._pendingData = nil
 				self._pendingPromise = nil
-				self:write(self._pendingData)
+				self:write(pendingData)
 			end)
 		end
 
