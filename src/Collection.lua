@@ -48,7 +48,7 @@ function Collection:getDocument(name)
 				self.name,
 				waitTime
 			))
-			Promise.delay(waitTime):await()
+			Promise.delay(waitTime):await() -- todo:  yields
 		end
 	end
 
