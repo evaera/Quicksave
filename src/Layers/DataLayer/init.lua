@@ -1,16 +1,20 @@
+local RetryLayer = require(script.Parent.RetryLayer)
+
 local HttpService = game:GetService("HttpService")
 
 local RawSchemes = require(script.Schemes.raw)
+local CompressedSchemes = require(script.Schemes.compressed)
 
 local MINIMUM_LENGTH_TO_COMPRESS = 1000
 
 local DataLayer = {
 	schemes = {
-		["raw/1"] = RawSchemes["raw/1"]
+		["raw/1"] = RawSchemes["raw/1"];
+		["compressed/1"] = CompressedSchemes["compressed/1"];
 	}
 }
 
-function DataLayer.unpack(value)
+function DataLayer._unpack(value)
 	if value == nil then
 		return nil
 	end
@@ -24,7 +28,7 @@ function DataLayer.unpack(value)
 	return HttpService:JSONDecode(DataLayer.schemes[scheme].unpack(value.data))
 end
 
-function DataLayer.pack(value)
+function DataLayer._pack(value)
 	value = HttpService:JSONEncode(value)
 
 	local scheme
@@ -38,6 +42,17 @@ function DataLayer.pack(value)
 		scheme = scheme;
 		data = DataLayer.schemes[scheme].pack(value)
 	}
+end
+
+-- Todo: Prevent unpacking twice
+function DataLayer.update(collection, key, callback)
+	return DataLayer._unpack(RetryLayer.update(collection, key, function(value)
+		return DataLayer._pack(callback(DataLayer._unpack(value)))
+	end))
+end
+
+function DataLayer.read(collection, key)
+	return DataLayer._unpack(RetryLayer.read(collection, key))
 end
 
 return DataLayer

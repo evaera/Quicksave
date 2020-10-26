@@ -1,18 +1,16 @@
 local LockSession = require(script.LockSession)
-local RetryLayer = require(script.Parent.RetryLayer)
+local MigrationLayer = require(script.Parent.MigrationLayer)
 
 local AccessLayer = {}
 
-function AccessLayer.acquireLockSession(collection, key)
-	local lockSession = LockSession.new(collection, key)
+function AccessLayer.acquireLockSession(collection, key, migrations)
+	local lockSession = LockSession.new(collection, key, migrations)
 
 	return lockSession:lock()
 end
 
-function AccessLayer.readWithoutLock(collection, key)
-	local value = RetryLayer.read(collection, key) or {}
-
-	return value.data
+function AccessLayer.readWithoutLock(collection, key, migrations)
+	return MigrationLayer.read(collection, key, migrations)
 end
 
 return AccessLayer

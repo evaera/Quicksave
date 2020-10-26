@@ -42,16 +42,4 @@ function RetryLayer.read(...)
 	end, ...)
 end
 
-function RetryLayer.write(...)
-	return RetryLayer._retry(function(...)
-		return ThrottleLayer.write(...)
-	end, ...)
-end
-
-function RetryLayer.remove(...)
-	return RetryLayer._retry(function(...)
-		return ThrottleLayer.remove(...)
-	end, ...)
-end
-
 return RetryLayer

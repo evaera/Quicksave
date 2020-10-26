@@ -1,10 +1,12 @@
 local makeEnum = require(script.Parent.makeEnum).makeEnum
+local getTime = require(script.Parent.getTime).getTime
 
 local Error = {
 	Kind = makeEnum("Quicksave.Error.Kind", {
 		"DataStoreError",
 		"CouldNotAcquireLock",
-		"LockConsistencyViolation"
+		"LockConsistencyViolation",
+		"SchemaValidationFailed"
 	}),
 }
 Error.__index = Error
@@ -17,7 +19,7 @@ function Error.new(options, parent)
 		context = options.context,
 		kind = options.kind,
 		parent = parent,
-		createdTick = os.clock(),
+		createdTick = getTime(),
 		createdTrace = debug.traceback(),
 	}, Error)
 end

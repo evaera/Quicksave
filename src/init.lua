@@ -1,10 +1,12 @@
 local t = require(script.Parent.t)
 local Promise = require(script.Parent.Promise)
 local Collection = require(script.Collection)
+local Error = require(script.Error)
 
 local Quicksave = {
 	t = t;
 	Promise = Promise;
+	Error = Error;
 
 	_collections = {};
 }

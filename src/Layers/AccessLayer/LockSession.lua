@@ -1,10 +1,12 @@
-local RetryLayer = require(script.Parent.Parent.RetryLayer)
+local MigrationLayer = require(script.Parent.Parent.MigrationLayer)
 local Error = require(script.Parent.Parent.Parent.Error)
 local Promise = require(script.Parent.Parent.Parent.Parent.Promise)
+local getTime = require(script.Parent.Parent.Parent.getTime).getTime
 
 local HttpService = game:GetService("HttpService")
 
 local LOCK_EXPIRE = 60 * 5
+local WRITE_MAX_INTERVAL = 7
 
 local function consistencyError()
 	return Error.new({
@@ -16,7 +18,9 @@ end
 local LockSession = {}
 LockSession.__index = LockSession
 
-function LockSession.new(collection, key)
+function LockSession.new(collection, key, migrations)
+	assert(migrations ~= nil, "migrations is nil")
+
 	return setmetatable({
 		collection = collection;
 		key = key;
@@ -26,6 +30,8 @@ function LockSession.new(collection, key)
 		_lastWrite = -1;
 		_pendingData = nil;
 		_pendingPromise = nil;
+		_pendingClose = false;
+		_migrations = migrations;
 	}, LockSession)
 end
 
@@ -36,7 +42,7 @@ function LockSession:lock()
 
 	local success
 
-	self._value = RetryLayer.update(self.collection, self.key, function(value)
+	self._value = MigrationLayer.update(self.collection, self.key, function(value)
 		value = value or {
 			createdAt = os.time();
 			updatedAt = os.time();
@@ -53,12 +59,11 @@ function LockSession:lock()
 		success = true
 
 		return value
-	end)
-
+	end, self._migrations)
 
 	if success and self._value.lockId == self._lockId then
 		self._locked = true
-		self._lastWrite = os.clock()
+		self._lastWrite = getTime()
 		return self
 	end
 
@@ -69,7 +74,7 @@ function LockSession:lock()
 end
 
 function LockSession:_checkConsistency(value)
-	return value.lockId and value.lockId  == self._lockId
+	return value.lockId and value.lockId == self._lockId
 end
 
 function LockSession:_ensureLocked()
@@ -81,19 +86,31 @@ end
 function LockSession:write(data)
 	self:_ensureLocked()
 
+	if self._pendingClose then
+		error("Attempt to write to a LockSession that is pending to be closed.")
+	end
+
 	if data == nil then
 		warn("[Debug, remove for release] LockSession:write data is nil!")
 	end
 
-	if os.clock() - self._lastWrite < 6 then
+
+	if getTime() - self._lastWrite < WRITE_MAX_INTERVAL then
+		warn("Queueing key =", self.collection, self.key)
 		self._pendingData = data
 
 		if not self._pendingPromise then
-			self._pendingPromise = Promise.delay(os.clock() - self._lastWrite):andThen(function()
-				local pendingData = self._pendingData
-				self._pendingData = nil
+			self._pendingPromise = Promise.delay(WRITE_MAX_INTERVAL - (getTime() - self._lastWrite)):andThen(function()
 				self._pendingPromise = nil
-				self:write(pendingData)
+
+				if self._pendingClose then
+					self._pendingClose = false
+					self:unlock()
+				else
+					local pendingData = self._pendingData
+					self._pendingData = nil
+					self:write(pendingData)
+				end
 			end)
 		end
 
@@ -101,7 +118,7 @@ function LockSession:write(data)
 	end
 
 	local errorVal
-	self._value = RetryLayer.update(self.collection, self.key, function(value)
+	self._value = MigrationLayer.update(self.collection, self.key, function(value)
 		if not self:_checkConsistency(value) then
 			errorVal = consistencyError()
 			return nil
@@ -112,13 +129,13 @@ function LockSession:write(data)
 		value.data = data
 
 		return value
-	end)
+	end, self._migrations)
 
 	if errorVal then
 		error(errorVal)
 	end
 
-	self._lastWrite = os.clock()
+	self._lastWrite = getTime()
 end
 
 function LockSession:read()
@@ -137,20 +154,44 @@ function LockSession:getCreatedTimestamp()
 	return self._value.createdAt
 end
 
+function LockSession:unlockWithFinalData(data)
+	self._pendingData = data
+
+	return self:unlock()
+end
+
 function LockSession:unlock()
+	if getTime() - self._lastWrite < WRITE_MAX_INTERVAL or self._pendingPromise then
+		self._pendingClose = true
+
+		if self._pendingPromise == nil then
+			self._pendingPromise = Promise.delay(WRITE_MAX_INTERVAL - (getTime() - self._lastWrite)):andThen(function()
+				self._pendingPromise = nil
+				self:unlock()
+			end)
+		end
+
+		return self._pendingPromise:expect()
+	end
+
 	self._locked = false
 	self._value = nil
 
-	RetryLayer.update(self.collection, self.key, function(value)
+	MigrationLayer.update(self.collection, self.key, function(value)
 		if not self:_checkConsistency(value) then
 			return nil
+		end
+
+		if self._pendingData then
+			value.data = self._pendingData
+			self._pendingData = nil
 		end
 
 		value.lockedAt = nil
 		value.lockId = nil
 
 		return value
-	end)
+	end, self._migrations)
 end
 
 return LockSession
