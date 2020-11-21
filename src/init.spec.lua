@@ -57,7 +57,7 @@ return function()
 
 	describe("Quicksave", function()
 		it("should be able to create collections", function()
-			local collection = Quicksave.createCollection("collectionName", {
+			Quicksave.createCollection("collectionName", {
 				schema = {
 					foo = t.optional(t.string);
 					key = t.optional(t.string);
@@ -143,7 +143,7 @@ return function()
 
 			progressTime(7)
 
-			local doc = Quicksave.getCollection("playerData"):getDocument("large"):expect()
+			doc = Quicksave.getCollection("playerData"):getDocument("large"):expect()
 			expect(doc:get("foo")).to.equal(string.rep("a", 2000))
 		end)
 
