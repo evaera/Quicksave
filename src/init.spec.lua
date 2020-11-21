@@ -88,19 +88,6 @@ return function()
 		end)
 	end)
 
-	describe("Collection", function()
-		it("should be able to get documents", function()
-			local collection = Quicksave.getCollection("collectionName")
-
-			local document = collection:getDocument("foobar"):expect()
-
-			expect(document.collection).to.equal(collection)
-			expect(document.name).to.equal("foobar")
-
-			expect(collection:getDocument("foobar"):expect()).to.equal(document)
-		end)
-	end)
-
 	describe("Document", function()
 		Quicksave.createCollection("playerData", {
 			schema = {
