@@ -57,7 +57,8 @@ Data flows through the library in this order:
 3. DataLayer (Handles compression)
 4. RetryLayer
 5. ThrottleLayer
-6. Roblox Datastores
+6. DataStoreLayer
+7. Roblox Datastores
 
 ## To do
 
