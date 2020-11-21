@@ -69,6 +69,12 @@ return function()
 			})
 		end)
 
+		it("should error when creating a collection without a schema", function()
+			expect(function()
+				Quicksave.createCollection("collectionName")
+			end).to.throw()
+		end)
+
 		it("should not allow duplicate collections", function()
 			expect(function()
 				Quicksave.createCollection("collectionName", {
