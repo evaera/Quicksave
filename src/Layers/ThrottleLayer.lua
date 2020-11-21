@@ -1,6 +1,8 @@
 local DataStoreService = require(script.Parent.Parent.Parent.MockDataStoreService)
 local RunService = game:GetService("RunService")
 
+local DataStoreLayer = require(script.Parent.DataStoreLayer)
+
 local METHOD_RESOURCE_MAP = {
 	GetAsync = Enum.DataStoreRequestType.GetAsync;
 	UpdateAsync = Enum.DataStoreRequestType.UpdateAsync,
@@ -13,25 +15,11 @@ local ThrottleLayer = {
 	_dataStores = {};
 }
 
-function ThrottleLayer._getDataStore(collection)
-	if ThrottleLayer._dataStores[collection] == nil then
-		ThrottleLayer._dataStores[collection] = DataStoreService:GetDataStore(collection, "_package/eryn.io/quicksave")
-	end
-
-	return ThrottleLayer._dataStores[collection]
-end
-
-function ThrottleLayer._performNow(methodName, collection, ...)
-	local dataStore = ThrottleLayer._getDataStore(collection)
-
-	return dataStore[methodName](dataStore, ...)
-end
-
-function ThrottleLayer._perform(methodName, ...)
+function ThrottleLayer._perform(methodName, collectionName, ...)
 	local resource = METHOD_RESOURCE_MAP[methodName]
 
 	if DataStoreService:GetRequestBudgetForRequestType(resource) > 0 then
-		return ThrottleLayer._performNow(methodName, ...)
+		return DataStoreLayer.perform(methodName, collectionName, ...)
 	end
 
 	if ThrottleLayer._queue[resource] == nil then
@@ -41,7 +29,7 @@ function ThrottleLayer._perform(methodName, ...)
 		connection = RunService.Heartbeat:Connect(function()
 			for _, thread in ipairs(ThrottleLayer._queue[resource]) do
 				if DataStoreService:GetRequestBudgetForRequestType(resource) > 0 then
-					ThrottleLayer._performNow(unpack(thread))
+					DataStoreLayer.perform(unpack(thread))
 				else
 					break
 				end
