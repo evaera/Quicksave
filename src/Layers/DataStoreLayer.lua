@@ -1,4 +1,4 @@
-local DataStoreService = game:GetService("DataStoreService")
+local DataStoreService = require(script.Parent.Parent.Parent.MockDataStoreService)
 
 local DataStoreLayer = {
     _dataStores = {};
