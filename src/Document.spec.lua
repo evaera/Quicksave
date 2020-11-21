@@ -36,11 +36,32 @@ return function()
         document = collection:getDocument("document"):expect()
     end)
 
+    it("should be able to load new document with default data", function()
+        local testCollection = Quicksave.createCollection("testCollection", {
+            schema = {
+                foo = t.string;
+            };
+            defaultData = {
+                foo = "data";
+            };
+        })
+
+        local testDocument = testCollection:getDocument("testDocument"):expect()
+
+        expect(testDocument:get("foo")).to.equal("data")
+    end)
+
     it("should not be able to load a locked document", function()
         local ok, err = collection:getDocument("locked"):await()
 
         expect(ok).to.equal(false)
         expect(err.kind).to.equal(Quicksave.Error.Kind.CouldNotAcquireLock)
+    end)
+
+    it("should be able to load existing data", function()
+        local doc = collection:getDocument("evaera"):expect()
+
+        expect(doc:get("foo")).to.equal("bar")
     end)
 
     it("should compress large data", function()
@@ -61,12 +82,6 @@ return function()
 
         doc = collection:getDocument("large"):expect()
         expect(doc:get("foo")).to.equal(string.rep("a", 2000))
-    end)
-
-    it("should be able to load existing data", function()
-        local doc = collection:getDocument("evaera"):expect()
-
-        expect(doc:get("foo")).to.equal("bar")
     end)
 
     it("should be able to load existing data with a migration", function()
