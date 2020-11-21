@@ -30,30 +30,34 @@ local progressTime do
 	end
 end
 
-local MockDataStoreService = require(script.Parent.Parent.MockDataStoreService)
-
-MockDataStoreService:ImportFromJSON([[
-	{
-		"DataStore": {
-			"playerData": {
-				"_package/eryn.io/quicksave": {
-					"evaera": {"data":"{\"generation\":1,\"data\":{\"lockedAt\":1603680426,\"updatedAt\":1603680426,\"lockId\":\"{614A5286-A137-4598-A3EF-54825220DEDC}\",\"data\":{\"foo\":\"bar\"},\"createdAt\":1603680426}}","scheme":"raw/1"},
-					"locked": {"data":"{\"generation\":1,\"data\":{\"lockedAt\":9999999999,\"updatedAt\":1603680426,\"lockId\":\"{614A5286-A137-4598-A3EF-54825220DEDC}\",\"data\":{\"foo\":\"bar\"},\"createdAt\":1603680426}}","scheme":"raw/1"}
-				}
-			},
-			"migrationTests": {
-				"_package/eryn.io/quicksave": {
-					"migrationTest": {"data":"{\"generation\":0,\"data\":{\"lockedAt\":1603680426,\"updatedAt\":1603680426,\"lockId\":\"{614A5286-A137-4598-A3EF-54825220DEDC}\",\"data\":{\"oldKey\":\"foobar\"},\"createdAt\":1603680426}}","scheme":"raw/1"}
-				}
-			}
-		}
-	}
-]])
-
 return function()
 	warn("Running tests at", SUPER_SPEED and "super speed" or "regular speed")
 
+	local MockDataStoreManager = require(script.Parent.Parent.MockDataStoreService.MockDataStoreService.MockDataStoreManager)
+	local MockDataStoreService = require(script.Parent.Parent.MockDataStoreService)
 	local Quicksave = require(script.Parent)
+
+	beforeEach(function()
+		MockDataStoreManager.ResetData()
+
+		MockDataStoreService:ImportFromJSON([[
+			{
+				"DataStore": {
+					"playerData": {
+						"_package/eryn.io/quicksave": {
+							"evaera": {"data":"{\"generation\":1,\"data\":{\"lockedAt\":1603680426,\"updatedAt\":1603680426,\"lockId\":\"{614A5286-A137-4598-A3EF-54825220DEDC}\",\"data\":{\"foo\":\"bar\"},\"createdAt\":1603680426}}","scheme":"raw/1"},
+							"locked": {"data":"{\"generation\":1,\"data\":{\"lockedAt\":9999999999,\"updatedAt\":1603680426,\"lockId\":\"{614A5286-A137-4598-A3EF-54825220DEDC}\",\"data\":{\"foo\":\"bar\"},\"createdAt\":1603680426}}","scheme":"raw/1"}
+						}
+					},
+					"migrationTests": {
+						"_package/eryn.io/quicksave": {
+							"migrationTest": {"data":"{\"generation\":0,\"data\":{\"lockedAt\":1603680426,\"updatedAt\":1603680426,\"lockId\":\"{614A5286-A137-4598-A3EF-54825220DEDC}\",\"data\":{\"oldKey\":\"foobar\"},\"createdAt\":1603680426}}","scheme":"raw/1"}
+						}
+					}
+				}
+			}
+		]])
+	end)
 
 	describe("Quicksave", function()
 		it("should be able to create collections", function()
