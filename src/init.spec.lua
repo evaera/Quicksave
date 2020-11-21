@@ -78,7 +78,7 @@ return function()
 				Quicksave.createCollection("collectionName")
 			end).to.throw()
 		end)
-
+	
 		it("should not allow duplicate collections", function()
 			expect(function()
 				Quicksave.createCollection("collectionName", {
@@ -87,17 +87,17 @@ return function()
 				})
 			end).to.throw()
 		end)
-
+	
 		it("should be able to get collections", function()
 			local collection = Quicksave.getCollection("collectionName")
-
+	
 			expect(collection).to.be.ok()
-			print(collection.name)
 			expect(collection.name).to.equal("collectionName")
 			expect(Quicksave.getCollection("collectionName")).to.equal(collection)
 		end)
 	end)
 
+	--[[
 	describe("Document", function()
 		Quicksave.createCollection("playerData", {
 			schema = {
@@ -256,4 +256,5 @@ return function()
 			end).to.throw()
 		end)
 	end)
+	--]]
 end
