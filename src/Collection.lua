@@ -29,7 +29,7 @@ function Collection.new(name, options)
 		name = name;
 		schema = options.schema;
 		runSchema = runSchema;
-		defualtData = options.defaultData;
+		defaultData = options.defaultData;
 		_migrations = options.migrations or {};
 		_activeDocuments = {};
 		_justClosedDocuments = {};
