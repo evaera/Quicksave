@@ -4,15 +4,6 @@ local progressTime = require(script.Parent.progressTime)
 local t = require(script.Parent.Parent.t)
 
 return function()
-    -- readyPromise
-    -- get
-    -- set
-    -- save
-    -- close
-    -- isClosed
-
-    -- TODO: Test default data?
-
     local MockDataStoreService = require(script.Parent.Parent.MockDataStoreService)
     local Quicksave = require(script.Parent)
 
