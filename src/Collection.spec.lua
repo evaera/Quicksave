@@ -27,8 +27,6 @@ return function()
     
             expect(collection:getDocument("foobar"):expect()).to.equal(document)
         end)
-
-        -- TODO: Test getting just closed documents. It isn't very possible because it yields.
     end)
 
     describe("keyExists", function()
