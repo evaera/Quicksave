@@ -1,47 +1,6 @@
 {
-	"name": "quicksave",
+	"name": "Quicksave",
 	"tree": {
-		"$className": "DataModel",
-		"Workspace": {
-			"$className": "Workspace",
-			"Baseplate": {
-				"$className": "Part",
-				"$properties": {
-					"Size": [
-						400,
-						5,
-						400
-					],
-					"Anchored": true
-				}
-			}
-		},
-		"ServerScriptService": {
-			"$className": "ServerScriptService",
-			"Promise": {
-				"$path": "./modules/Promise/lib/"
-			},
-			"t": {
-				"$path": "./modules/t/lib/"
-			},
-			"Quicksave": {
-				"$path": "./src"
-			},
-			"MockDataStoreService": {
-				"$path": "./modules/MockDataStoreService/lib"
-			}
-		},
-		"TestService": {
-			"$className": "TestService",
-			"$properties": {
-				"ExecuteWithStudioRun": true
-			},
-			"runTests": {
-				"$path": "./testRunner/runTests.server.lua"
-			},
-			"TestEZ": {
-				"$path": "./modules/testez/src"
-			}
-		}
+		"$path": "src"
 	}
 }
