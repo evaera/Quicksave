@@ -34,8 +34,6 @@ function DocumentData:read()
 			newData = self._collection.defaultData or {}
 		end
 
-		self._collection:validateData(newData)
-
 		self._currentData = newData
 		self._dataLoaded = true
 	end
