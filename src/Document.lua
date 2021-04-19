@@ -17,24 +17,11 @@ end
 
 function Document:readyPromise()
 	if self._readyPromise == nil then
-		self._readyPromise = Promise.new(function(resolve, reject)
+		self._readyPromise = Promise.new(function(resolve)
 			self._data = DocumentData.new({
 				lockSession = AccessLayer.acquireLockSession(self.collection.name, self.name, self.collection._migrations);
 				collection = self.collection;
 			})
-
-			local schemaOk, schemaError = self.collection:validateData(self._data:read())
-
-			if not schemaOk then
-				reject(Error.new({
-					kind = Error.Kind.SchemaValidationFailed,
-					error = schemaError,
-					context = ("Schema validation failed when loading data in collection %q key %q"):format(
-						self.collection.name,
-						self.name
-					)
-				}))
-			end
 
 			resolve(self)
 		end)
