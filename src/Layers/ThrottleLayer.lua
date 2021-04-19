@@ -27,7 +27,8 @@ function ThrottleLayer._perform(methodName, collectionName, ...)
 	if ThrottleLayer._queue[resource] == nil then
 		ThrottleLayer._queue[resource] = {}
 
-		Promise.defer(function(resolve)
+		coroutine.wrap(function()
+			RunService.Heartbeat:Wait()
 			while #ThrottleLayer._queue[resource] > 0 do
 				local request = table.remove(ThrottleLayer._queue[resource], 1)
 
@@ -47,8 +48,7 @@ function ThrottleLayer._perform(methodName, collectionName, ...)
 			end
 
 			ThrottleLayer._queue[resource] = nil
-			resolve()
-		end)
+		end)()
 	end
 
 	local args = { methodName, collectionName, ... }
