@@ -1,7 +1,6 @@
 local Promise = require(script.Parent.Parent.Promise)
 local AccessLayer = require(script.Parent.Layers.AccessLayer)
 local DocumentData = require(script.Parent.DocumentData)
-local Error = require(script.Parent.Error)
 local stackSkipAssert = require(script.Parent.stackSkipAssert).stackSkipAssert
 
 local Document = {}
