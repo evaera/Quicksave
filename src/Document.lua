@@ -20,6 +20,7 @@ function Document:readyPromise()
 			self._data = DocumentData.new({
 				lockSession = AccessLayer.acquireLockSession(self.collection.name, self.name, self.collection._migrations);
 				collection = self.collection;
+				name = self.name;
 			})
 
 			resolve(self)

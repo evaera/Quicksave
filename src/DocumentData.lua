@@ -10,6 +10,7 @@ function DocumentData.new(options)
 		_lockSession = options.lockSession;
 		_readOnlyData = options.readOnlyData;
 		_collection = options.collection;
+		_name = options.name;
 		_currentData = nil;
 		_dataLoaded = false;
 		_closed = false;
@@ -44,7 +45,7 @@ function DocumentData:read()
 				error = schemaError,
 				context = ("Schema validation failed when loading data in collection %q key %q"):format(
 					self._collection.name,
-					self.name
+					self._name
 				)
 			}))
 		end
