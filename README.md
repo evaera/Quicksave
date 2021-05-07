@@ -1,3 +1,7 @@
+# Looking for new maintainer
+I never ended up using Quicksave in a game, and have no need for it moving forward, so it's hard to justify spending personal time maintaining a library I don't use. I think it was a nice experiment, but I would probably do things differently if I were to write a new saving system today. Specifically, the tight coupling between layers makes writing tests really hard, because the layers can't be constructed in a vacuum. If you want to take over Quicksave, finish it out and maintaing it moving forward, let me know in an issue so I can redirect newcomers to this repo to your fork!
+
+
 # Quicksave
 
 DataStore abstraction library that offers:
