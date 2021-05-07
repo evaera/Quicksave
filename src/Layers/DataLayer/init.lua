@@ -44,11 +44,20 @@ function DataLayer._pack(value)
 	}
 end
 
--- Todo: Prevent unpacking twice
 function DataLayer.update(collection, key, callback)
-	return DataLayer._unpack(RetryLayer.update(collection, key, function(value)
-		return DataLayer._pack(callback(DataLayer._unpack(value)))
-	end))
+	local decompressed
+
+	RetryLayer.update(collection, key, function(value)
+		decompressed = callback(DataLayer._unpack(value))
+
+		if decompressed ~= nil then
+			return DataLayer._pack(decompressed)
+		else
+			return nil
+		end
+	end)
+
+	return decompressed
 end
 
 function DataLayer.read(collection, key)

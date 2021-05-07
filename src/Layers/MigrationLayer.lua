@@ -27,11 +27,20 @@ function MigrationLayer._pack(value, migrations)
 	}
 end
 
--- Todo: Prevent unpacking twice
 function MigrationLayer.update(collection, key, callback, migrations)
-	return MigrationLayer._unpack(DataLayer.update(collection, key, function(value)
-		return MigrationLayer._pack(callback(MigrationLayer._unpack(value, migrations)), migrations)
-	end), migrations)
+	local migrated
+
+	DataLayer.update(collection, key, function(value)
+		migrated = callback(MigrationLayer._unpack(value, migrations))
+
+		if migrated ~= nil then
+			return MigrationLayer._pack(migrated, migrations)
+		else
+			return nil
+		end
+	end)
+
+	return migrated
 end
 
 function MigrationLayer.read(collection, key, migrations)
