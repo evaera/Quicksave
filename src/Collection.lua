@@ -54,15 +54,13 @@ function Collection:getDocument(name)
 
 	if self._activeDocuments[name] == nil then
 		self._activeDocuments[name] = Document.new(self, name)
+
+		self._activeDocuments[name]:readyPromise():catch(function()
+			self._activeDocuments[name] = nil
+		end)
 	end
 
-	local promise = self._activeDocuments[name]:readyPromise()
-
-	promise:catch(function()
-		self._activeDocuments[name] = nil
-	end)
-
-	return promise
+	return self._activeDocuments[name]:readyPromise()
 end
 
 function Collection:getLatestMigrationVersion()
