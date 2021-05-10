@@ -1,3 +1,5 @@
+local Error = require(script.Parent.Error)
+
 local DocumentData = {}
 DocumentData.__index = DocumentData
 
@@ -8,6 +10,7 @@ function DocumentData.new(options)
 		_lockSession = options.lockSession;
 		_readOnlyData = options.readOnlyData;
 		_collection = options.collection;
+		_name = options.name;
 		_currentData = nil;
 		_dataLoaded = false;
 		_closed = false;
@@ -34,7 +37,18 @@ function DocumentData:read()
 			newData = self._collection.defaultData or {}
 		end
 
-		assert(self._collection:validateData(newData))
+		local schemaOk, schemaError = self._collection:validateData(newData)
+
+		if not schemaOk then
+			error(Error.new({
+				kind = Error.Kind.SchemaValidationFailed,
+				error = schemaError,
+				context = ("Schema validation failed when loading data in collection %q key %q"):format(
+					self._collection.name,
+					self._name
+				)
+			}))
+		end
 
 		self._currentData = newData
 		self._dataLoaded = true

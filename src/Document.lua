@@ -1,7 +1,6 @@
 local Promise = require(script.Parent.Parent.Promise)
 local AccessLayer = require(script.Parent.Layers.AccessLayer)
 local DocumentData = require(script.Parent.DocumentData)
-local Error = require(script.Parent.Error)
 local stackSkipAssert = require(script.Parent.stackSkipAssert).stackSkipAssert
 
 local Document = {}
@@ -17,24 +16,12 @@ end
 
 function Document:readyPromise()
 	if self._readyPromise == nil then
-		self._readyPromise = Promise.new(function(resolve, reject)
+		self._readyPromise = Promise.new(function(resolve)
 			self._data = DocumentData.new({
 				lockSession = AccessLayer.acquireLockSession(self.collection.name, self.name, self.collection._migrations);
 				collection = self.collection;
+				name = self.name;
 			})
-
-			local schemaOk, schemaError = self.collection:validateData(self._data:read())
-
-			if not schemaOk then
-				reject(Error.new({
-					kind = Error.Kind.SchemaValidationFailed,
-					error = schemaError,
-					context = ("Schema validation failed when loading data in collection %q key %q"):format(
-						self.collection.name,
-						self.name
-					)
-				}))
-			end
 
 			resolve(self)
 		end)
