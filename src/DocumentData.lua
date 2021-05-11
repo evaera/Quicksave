@@ -1,3 +1,17 @@
+local function copyDeep(dictionary)
+	local new = {}
+
+	for key, value in pairs(dictionary) do
+		if type(value) == "table" then
+			new[key] = copyDeep(value)
+		else
+			new[key] = value
+		end
+	end
+
+	return new
+end
+
 local DocumentData = {}
 DocumentData.__index = DocumentData
 
@@ -31,7 +45,8 @@ function DocumentData:read()
 		local newData = self:_load()
 
 		if newData == nil then
-			newData = self._collection.defaultData or {}
+			local defaultData = self._collection.defaultData
+			newData = defaultData and copyDeep(defaultData) or {}
 		end
 
 		assert(self._collection:validateData(newData))
